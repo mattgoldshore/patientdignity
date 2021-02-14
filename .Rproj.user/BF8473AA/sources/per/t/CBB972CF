@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1613314974068.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1965995650",
+    "id" : "CBB972CF",
+    "lastKnownWriteTime" : 1613314928,
+    "last_content_update" : 1613314928,
+    "path" : "~/Dropbox/R/patientdignity/scripts/dignityrscript.R",
+    "project_path" : "scripts/dignityrscript.R",
+    "properties" : {
+        "cursorPosition" : "21,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

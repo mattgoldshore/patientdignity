@@ -1,0 +1,9 @@
+{
+    "path" : "~/Dropbox/R/patientdignity",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
