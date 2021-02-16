@@ -12,7 +12,7 @@ library(tidyverse)
 
 dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for analysis.xls")
 
-## variable management and exploratory data analysis
+## variable management, data visualization and analysis
 ## there are a total of 16 variables in the original dataset
 
 
