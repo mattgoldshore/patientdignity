@@ -20,7 +20,7 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
 ########################
 
 # var: pdq dignity response
-  dignity$DignityResponse
+  # dignity$DignityResponse
 
 # var: dignity code
   dignity$Code1
@@ -32,26 +32,70 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
 # var: create the chochinov categorical variable based on code1
   dignity <- dignity %>% 
     mutate( 
-      chochinov3 = case_when(code1 == "Coping strategies" ~ 'Dignity Conserving Repertoire',
+      chochinov3 = case_when(code1 == "Fears" ~ 'Illness-Related Concerns',
+                             code1 == "Symptoms" ~ 'Illness-Related Concerns',
+                             code1 == "Coping strategies" ~ 'Dignity Conserving Repertoire',
                              code1 == "Goals" ~ 'Dignity Conserving Repertoire',
                              code1 == "Identity" ~ 'Dignity Conserving Repertoire',
-                             code1 == "Fears" ~ 'Illness-Related Concerns',
-                             code1 == "Symptoms" ~ 'Illness-Related Concerns',
                              code1 == "Interpersonal interaction" ~ 'Social Dignity Inventory',
                              code1 == "Other" ~ 'Other'))
-  dignity$chochinov3 = factor(dignity$chochinov3)  # tranform chochinov3 to a factor variable
+  dignity$chochinov3 <- factor(dignity$chochinov3,
+                          levels=c('Illness-Related Concerns', 
+                             'Dignity Conserving Repertoire', 
+                             'Social Dignity Inventory', 
+                             'Other'))
   dignity %>% count(chochinov3)
 
+  dignity <- dignity %>% 
+    mutate( 
+      code1nofam = case_when(code1 == "Fears" ~ 'Fears',
+                             code1 == "Symptoms" ~ 'Symptoms',
+                             code1 == "Coping strategies" ~ 'Coping Strategies',
+                             code1 == "Goals" ~ 'Goals',
+                             code1 == "Identity" ~ 'Identity',
+                             code1 == "Interpersonal interaction" ~ 'Interpersonal Interaction',
+                             code1 == "Other" ~ 'Other'))
+   dignity$code1nofam <- factor(dignity$code1nofam,
+                               levels=c('Fears', 
+                                        'Symptoms', 
+                                        'Coping Strategies', 
+                                        'Goals',
+                                        'Identity',
+                                        'Interpersonal Interaction',
+                                        'Other'))
+  
+  dignity %>% count(code1nofam)
+  
 # var: Subcode1
   dignity$subcode1 = factor(dignity$Subcode1) # tranform Subcode1 to a factor variable
   # ggplot(dignity) + geom_bar(mapping = aes(x = subcode1)) + coord_flip() # bar graph and summary for subcode2
-  dignity %>% count(subcode1)
-
-# var4: Code2
-  dignity$Code2
+  # dignity %>% count(subcode1)
+  dignity <- dignity %>% 
+    mutate( 
+      code1fam = case_when(subcode1 == "Goals" ~ 'Goals',
+                           subcode1 == "Identity" ~ 'Identity'))
+  dignity <- dignity %>% 
+    mutate( 
+      participant = case_when(Code1 == "Fears" ~ 'Patient',
+                             Code1 == "Symptoms" ~ 'Patient',
+                             Code1 == "Coping strategies" ~ 'Patient',
+                             Code1 == "Goals" ~ 'Patient',
+                             Code1 == "Identity" ~ 'Patient',
+                             Code1 == "Interpersonal interaction" ~ 'Patient',
+                             Code1 == "Other" ~ 'Patient',
+                             Code1 == "Family" ~ 'Family'))
+  dignity$chochinov3 <- factor(dignity$chochinov3,
+                               levels=c('Illness-Related Concerns', 
+                                        'Dignity Conserving Repertoire', 
+                                        'Social Dignity Inventory', 
+                                        'Other'))
+  dignity %>% count(chochinov3)
+  
+  # var4: Code2
+  # dignity$Code2
 
 # var5: Subcode2
-  dignity$Subcode2
+  # dignity$Subcode2
 
 # var6: AdmittingDiagnosis
   # no changes at this time
@@ -60,23 +104,21 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
   dignity$age_n = as.numeric(dignity$Age)  # Transform Age into a numeric variable
   # ggplot(dignity) + geom_histogram(mapping = aes(x = age_n), binwidth = 1) # histogram and summary of age as a continuous metric
   # for reference: dignity %>% count(cut_width(age_n, 10))
-  dignity <- dignity %>% 
+  dignity_nonfamily <- dignity_nonfamily %>% 
     mutate( 
-       agegroup = case_when(age_n >= 90  & age_n <= 99 ~ '90 - 99',
-                            age_n >= 80  & age_n <= 89 ~ '80 - 89',
-                            age_n >= 70  & age_n <= 79 ~ '70 - 79',
-                            age_n >= 60  & age_n <= 69 ~ '60 - 69',
-                            age_n >= 50  & age_n <= 59 ~ '50 - 59',
-                            age_n >= 40  & age_n <= 49 ~ '40 - 49',
-                            age_n >= 30  & age_n <= 39 ~ '30 - 39',
-                            age_n >= 20  & age_n <= 29 ~ '20 - 29')) # create categorical variable of age in groups of 10
-  dignity %>% count(agegroup)
+       agegroup = case_when(age_n >= 85  ~ '85 +',
+                            age_n >= 75  & age_n <= 84 ~ '75 - 84',
+                            age_n >= 65  & age_n <= 74 ~ '65 - 74',
+                            age_n >= 55  & age_n <= 64 ~ '55 - 64',
+                            age_n >= 45  & age_n <= 54 ~ '45 - 54',
+                            age_n >= 35  & age_n <= 44 ~ '35 - 44',
+                            age_n >= 20  & age_n <= 34 ~ '20 - 34')) 
 
 # var8: race
   
   dignity$race = factor(dignity$Race)  # tranform Race to a factor variable
   # ggplot(dignity) + geom_bar(mapping = aes(x = Race)) # bar graph and summary for race
-  dignity %>% count(race)
+  # dignity %>% count(race)
   
   dignity <- dignity %>% 
   mutate(
@@ -86,19 +128,19 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                           race == "NATIVE AMERICAN" | Race == "OTHER" ~ 'Other',
                           race == "PT REFUSED TO ANSWER" | Race == "NO VALUE ENTERED" | Race == "Unknown" ~ 'Refused/Unknown'))  # create racegroup 
   
-  dignity %>% count(racegroup)
-  ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # bar graph and summary for racegroup, alphabetical order by category
+  # dignity %>% count(racegroup)
+  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # bar graph and summary for racegroup, alphabetical order by category
   
-  dignity <- within(dignity, 
-                  racegroup <- factor(racegroup, 
-                                      levels=names(sort(table(racegroup), 
-                                                        decreasing=TRUE)))) # descending frequency
-  ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # descending frequency
+  # dignity <- within(dignity, 
+  #                racegroup <- factor(racegroup, 
+  #                                   levels=names(sort(table(racegroup), 
+  #                                                    decreasing=TRUE))) # descending frequency
+  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # descending frequency
   
-  dignity <- within(dignity, 
+   dignity <- within(dignity, 
                   racegroup <- factor(racegroup, 
                                       levels=c('White', 'Black', 'Asian', 'Other', 'Refused/Unknown'))) # preferred data organization
-  ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # preferred data organization
+  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # preferred data organization
 
 # var9: ethnicity
 
@@ -166,6 +208,16 @@ dignity$religiongroup[is.na.data.frame(dignity$religiongroup)] <- "Unknown/Refus
 # graph and quantify the distribution of religions in the dataset
 ggplot(dignity) + geom_bar(mapping = aes(x = religiongroup))
 dignity %>% count(religiongroup)
+
+dignity$religiongroup <- factor(dignity$religiongroup,
+                             levels=c('Christian', 
+                                      'Jewish', 
+                                      'Muslim', 
+                                      'Buddhist',
+                                      'Hindu',
+                                      'None',
+                                      'Other',
+                                      'Unknown/Refused'))
 
 # var11: TumorHistology
 # bar graph and summary for TumorHistology
@@ -275,7 +327,7 @@ dignity <- dignity %>%
                                   TumorSite == "C413-BONE, RIB/STERNUM/CLAVICLE & ASSOCIATED JOINTS" | 
                                   TumorSite == "C414-BONE, PELVIS" | 
                                   TumorSite == "C491-CONN, UPPER LIMB" |
-                                  TumorSite == "C492-CONN, LOWER LIMB" ~ 'Musculoskeletal',
+                                  TumorSite == "C492-CONN, LOWER LIMB" ~ 'Other',
                                   TumorSite == "C420-BLOOD" | 
                                   TumorSite == "C421-BONE MARROW" | 
                                   TumorSite == "C422-SPLEEN" |
@@ -291,11 +343,11 @@ dignity <- dignity %>%
                                   TumorSite == "C440-SKIN, LIP" | 
                                   TumorSite == "C441-SKIN, EYELID" |
                                   TumorSite == "C443-SKIN, FACE" | 
-                                  TumorSite == "C444-SKIN, SCALP/NECK" |
+                                  TumorSite == "C444-SKIN, SCALP/NECK" ~ 'Head and Neck',
                                   TumorSite == "C445-SKIN, TRUNK" | 
                                   TumorSite == "C446-SKIN, ARM/SHOULDER" |
                                   TumorSite == "C447-SKIN, LEG/HIP" | 
-                                  TumorSite == "C449-SKIN, NOS" ~ 'Skin',
+                                  TumorSite == "C449-SKIN, NOS" ~ 'Breast and Soft Tissue',
                                   TumorSite == "C480-RETROPERITONEUM" | 
                                   TumorSite == "C481-PERITONEUM, OTHER PARTS" | 
                                   TumorSite == "C482-PERITONEUM, NOS" | 
@@ -311,7 +363,7 @@ dignity <- dignity %>%
                                   TumorSite == "C504-BREAST, UOQ" | 
                                   TumorSite == "C505-BREAST, LOQ" | 
                                   TumorSite == "C508-BREAST, OVERLAPPING LESION OF BREAST" |
-                                  TumorSite == "C509-BREAST, NOS" ~ 'Breast',
+                                  TumorSite == "C509-BREAST, NOS" ~ 'Breast and Soft Tissue',
                                   TumorSite == "C510-LABIUM MAJUS" |
                                   TumorSite == "C519-VULVA, NOS" | 
                                   TumorSite == "C529-VAGINA, NOS" | 
@@ -329,7 +381,7 @@ dignity <- dignity %>%
                                   TumorSite == "C578-UTERINE ADNEXA, OTHER PARTS" | 
                                   TumorSite == "C589-PLACENTA" ~ 'Gynecologic',
                                   TumorSite == "C621-DESCENDED TESTIS" | 
-                                  TumorSite == "C629-TESTIS, NOS" ~ 'Germ cell',
+                                  TumorSite == "C629-TESTIS, NOS" |
                                   TumorSite == "C609-PENIS, NOS" | 
                                   TumorSite == "C619-PROSTATE" | 
                                   TumorSite == "C659-RENAL PELVIS" |
@@ -353,14 +405,25 @@ dignity <- dignity %>%
                                   TumorSite == "C716-CEREBELLUM" |
                                   TumorSite == "C718-BRAIN, OTHER" |
                                   TumorSite == "C719-BRAIN, NOS" |
-                                  TumorSite == "C720-SPINAL CORD" ~ 'Neurologic',
-                                  TumorSite == "C739-THYROID, NOS" |
-                                  TumorSite == "C749-ADRENAL GLAND, NOS" ~ 'Endocrine and Neuroendocrine'))
+                                  TumorSite == "C720-SPINAL CORD" ~ 'Other',
+                                  TumorSite == "C739-THYROID, NOS" ~ 'Head and Neck',
+                                  TumorSite == "C749-ADRENAL GLAND, NOS" ~ 'Other'))
 # this code renames all of the NA (blank) responses in the dignity$tumorsitegroup variable to "Unknown Primary"
 dignity$tumorsitegroup[is.na.data.frame(dignity$tumorsitegroup)] <- "Unknown Primary"
 # graph and quantify the distribution of tumor sites in the dataset
 ggplot(dignity) + geom_bar(mapping = aes(x = tumorsitegroup)) + coord_flip()
 dignity %>% count(tumorsitegroup)
+
+dignity$tumorsitegroup <- factor(dignity$tumorsitegroup,
+                                levels=c('Breast and Soft Tissue',
+                                          'Digestive/Gastrointestinal',
+                                          'Genitourinary',
+                                          'Gynecologic',
+                                          'Head and Neck',
+                                          'Hematologic/Blood',
+                                          'Respiratory/Thoracic',
+                                          'Other',
+                                          'Unknown Primary'))
 
 # var13: Deceased
 # bar graph and summary for Deceased
@@ -395,11 +458,257 @@ dignity %>% count(timetodeathgroup)
 ########################################
 
 dignity_nonfamily <- subset(dignity, dignity$code1 != "Family") # subset of dignity for patient-respondents 
-dignity_family <-  subset(dignity, dignity$code1 == "Family") # subset of dignity for family-respondents
+dignity_family <-  subset(dignity, dignity$code1 == "Family" & dignity$code1fam != 'NA') # subset of dignity for family-respondents
 
 #########################
 ## Explore the dataset ##
 #########################
+
+# Patient as respondent tables
+mean(dignity_nonfamily$age_n)
+sd(dignity_nonfamily$age_n)
+group_by(dignity, chochinov3) %>%
+  summarise(
+    count = n(),
+    mean = mean(age_n, na.rm = TRUE),
+    sd = sd(age_n, na.rm = TRUE)
+  )
+
+table(dignity_nonfamily$agegroup)
+prop.table(table(dignity_nonfamily$agegroup))*100
+table(dignity_nonfamily$agegroup, dignity_nonfamily$chochinov3)
+a <- prop.table(table(dignity_nonfamily$agegroup, dignity_nonfamily$chochinov3), margin=1)*100
+format(round(a,1))
+
+table(dignity_nonfamily$racegroup)
+round(prop.table(table(dignity_nonfamily$racegroup)),3)*100
+table(dignity_nonfamily$racegroup, dignity_nonfamily$chochinov3)
+a <- prop.table(table(dignity_nonfamily$agegroup, dignity_nonfamily$chochinov3), margin=1)*100
+format(round(a,1))
+
+group_by(dignity_nonfamily, chochinov3) %>%
+  summarise(
+    count = n(racegrup),
+    fre = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE)
+  )
+
+res.aov <- aov(age_n ~ chochinov3, data = dignity_nonfamily)
+summary(res.aov)
+
+freq(dignity_nonfamily$agegroup)
+ctable(dignity_nonfamily$agegroup, dignity_nonfamily$chochinov3, chisq = TRUE)
+
+freq(dignity_nonfamily$racegroup)
+ctable(dignity_nonfamily$racegroup, dignity_nonfamily$chochinov3, chisq = TRUE)
+
+freq(dignity_nonfamily$ethnicity)
+ctable(dignity_nonfamily$ethnicity, dignity_nonfamily$chochinov3, chisq = TRUE)
+
+freq(dignity_nonfamily$religiongroup)
+ctable(dignity_nonfamily$religiongroup, dignity_nonfamily$chochinov3, chisq = TRUE)
+fisher.test(dignity_nonfamily$religiongroup, dignity_nonfamily$chochinov3, simulate.p.value = TRUE)
+ 
+freq(dignity_nonfamily$tumorsitegroup)
+ctable(dignity_nonfamily$tumorsitegroup, dignity_nonfamily$chochinov3, chisq = TRUE)
+
+ctable(dignity$ethnicity, dignity$religiongroup, chisq = TRUE)
+
+
+
+group_by(dignity_nonfamily, code1nofam) %>%
+  summarise(
+    count = n(),
+    mean = mean(age_n, na.rm = TRUE),
+    sd = sd(age_n, na.rm = TRUE)
+  )
+
+freq(dignity_nonfamily$code1nofam)
+
+res.aov <- aov(age_n ~ code1nofam, data = dignity_nonfamily)
+summary(res.aov)
+
+freq(dignity_nonfamily$agegroup)
+ctable(dignity_nonfamily$agegroup, dignity_nonfamily$code1nofam, chisq = TRUE)
+
+freq(dignity_nonfamily$racegroup)
+ctable(dignity_nonfamily$racegroup, dignity_nonfamily$code1nofam, chisq = TRUE)
+
+freq(dignity_nonfamily$ethnicity)
+ctable(dignity_nonfamily$ethnicity, dignity_nonfamily$code1nofam, chisq = TRUE)
+
+freq(dignity_nonfamily$religiongroup)
+ctable(dignity_nonfamily$religiongroup, dignity_nonfamily$code1nofam, fisher.test = TRUE)
+fisher.test(dignity_nonfamily$religiongroup, dignity_nonfamily$code1nofam, simulate.p.value = TRUE)
+
+freq(dignity_nonfamily$tumorsitegroup)
+ctable(dignity_nonfamily$tumorsitegroup, dignity_nonfamily$code1nofam, chisq = TRUE)
+
+freq(dignity_nonfamily$deceased)
+ctable(dignity_nonfamily$deceased, dignity_nonfamily$code1nofam, chisq = TRUE)
+
+res.aov <- aov(timetodeath_n ~ code1nofam, data = dignity_nonfamily)
+summary(res.aov)
+
+wilcox.test(dignity_nonfamily$timetodeath_n, dignity_nonfamily$chochinov3)
+
+group_by(dignity_nonfamily, code1nofam) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE)
+  )
+
+## Table: family respondent
+
+freq(dignity_family$agegroup)
+ctable(dignity_family$agegroup, dignity_family$code1fam, chisq = TRUE, na.rm = TRUE)
+
+freq(dignity_family$racegroup)
+ctable(dignity_family$racegroup, dignity_family$code1fam, chisq = TRUE)
+
+freq(dignity_family$ethnicity)
+ctable(dignity_family$ethnicity, dignity_family$code1fam, chisq = TRUE)
+
+freq(dignity_family$religiongroup)
+ctable(dignity_family$religiongroup, dignity_family$code1fam, chisq = TRUE)
+
+freq(dignity_family$tumorsitegroup)
+ctable(dignity_family$tumorsitegroup, dignity_family$code1fam, chisq = TRUE)
+fisher.test(dignity_family$tumorsitegroup, dignity_family$code1fam, simulate.p.value = TRUE)
+
+freq(dignity_family$deceased)
+ctable(dignity_family$deceased, dignity_family$code1fam, chisq = TRUE)
+
+res.aov <- aov(timetodeath_n ~ code1fam, data = dignity_family)
+summary(res.aov)
+
+
+
+ctable(dignity_nonfamily$deceased, dignity_nonfamily$Subcode1, chisq = TRUE)
+
+
+
+# Death analysis for patient-respondents by chochinov3
+freq(dignity_family$deceased)
+ctable(dignity_nonfamily$chochinov3, dignity_nonfamily$deceased, chisq = TRUE)
+ctable(dignity_nonfamily$deceased, dignity_nonfamily$chochinov3, chisq = TRUE)
+
+median(dignity_nonfamily$timetodeath_n, na.rm = TRUE)
+IQR(dignity_nonfamily$timetodeath_n, na.rm = TRUE)
+quantile(dignity_nonfamily$timetodeath_n, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+
+group_by(dignity_nonfamily, chochinov3) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    IQR = IQR(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+kruskal.test(timetodeath_n ~ chochinov3, data = dignity_nonfamily)
+
+# Death analysis for patient-respondents by code1fam
+median(dignity_nonfamily$timetodeath_n, na.rm = TRUE)
+IQR(dignity_nonfamily$timetodeath_n, na.rm = TRUE)
+quantile(dignity_nonfamily$timetodeath_n, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+
+group_by(dignity_nonfamily, code1nofam) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    IQR = IQR(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+kruskal.test(timetodeath_n ~ code1nofam, data = dignity_nonfamily)
+
+# Present the median distributions as boxplots
+
+boxplot1 <- ggplot(data = dignity_nonfamily) +
+              geom_boxplot(mapping = aes(chochinov3, timetodeath_n, color = chochinov3)) +
+              coord_flip()
+dignity_nonfamily$chochinov3 <- factor(dignity_nonfamily$chochinov3 , levels=c("Other", 
+                                                                               "Social Dignity Inventory",
+                                                                               "Dignity Conserving Repertoire",
+                                                                               "Illness-Related"))
+
+boxplot1 +  scale_color_brewer(palette="RdYlBu") + 
+            theme_classic() + 
+            theme(legend.position="none") +
+            labs(title="Time to Death (days) by Dignity Category",x="", y = "Time to death (days)") +
+            theme(plot.title = element_text(hjust = 0.5)) +
+            scale_x_discrete(labels = c("Other",
+                                        "Social\nDignity\nInventory", 
+                                        "Dignity\nConserving\nRepertoire",
+                                        "Illness-\nRelates\nConcerns",
+                                        "Other"))
+
+
+
+
+
+dignity$code1nofam <- factor(dignity$code1nofam,
+                             levels=c('Fears', 
+                                      'Symptoms', 
+                                      'Coping Strategies', 
+                                      'Goals',
+                                      'Identity',
+                                      'Interpersonal Interaction',
+                                      'Other'))
+
+boxplot2 <- ggplot(data = dignity_nonfamily) +
+  geom_boxplot(mapping = aes(chochinov3, timetodeath_n, color = code1nofam)) +
+  coord_flip()
+
+boxplot2 +  scale_color_brewer(palette="Paired") + 
+  theme_classic() +
+  labs(title="Time to Death (days) by Dignity Category and Main Dignity Theme",x="", y = "Time to death (days)") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(labels = c("Other",
+                              "Social\nDignity\nInventory", 
+                              "Dignity\nConserving\nRepertoire",
+                              "Illness-\nRelates\nConcerns",
+                              "Other")) +
+  theme(legend.position="bottom") +
+  theme(legend.title = element_blank()) 
+  
+
+
+
+
+
+
+
+levels=c('Illness-Related Concerns', 
+         'Dignity Conserving Repertoire', 
+         'Social Dignity Inventory', 
+         'Other'))
+
+
+
+plot1 <- ggboxplot(dignity_nonfamily, x = "chochinov3", y = "timetodeath_n", 
+                   color = "chochinov3", palette = c("#00AFBB", "#E7B800", "#FC4E07", "336600"),
+                   ylab = "Time to Death (days)", xlab = "Dignity Category") +
+  
+
+
+boxplot1 + theme_classic()
+boxplot1 + ordered(dignity_nonfamily$chochinov3,
+                   levels = c("Illness-Related Concerns", 
+                              "Dignity Conserving Repertoire", 
+                              "Social Dignity Inventory",
+                              "Other"))
+
+
+
+
+
+
 
 table(dignity$code1, dignity$deceased)
 prop.table(table(dignity$code1, dignity$deceased), margin=1)*100
@@ -516,7 +825,8 @@ ggplot(data = dignity) + geom_point(mapping = aes(x = racegroup, y=timetodeath_n
 
 ggplot(data = dignity) + geom_bar(mapping = aes(x = agegroup, fill = code1))
 
-
+freq(non)
+ctable(dignity_nonfamily$ethnicity, dignity_nonfamily$chochinov3, chisq = TRUE)
 
 
 
