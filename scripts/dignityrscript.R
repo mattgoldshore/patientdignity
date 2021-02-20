@@ -589,6 +589,8 @@ ctable(dignity_nonfamily$deceased, dignity_nonfamily$Subcode1, chisq = TRUE)
 
 
 
+
+
 # Death analysis for patient-respondents by chochinov3
 freq(dignity_family$deceased)
 ctable(dignity_nonfamily$chochinov3, dignity_nonfamily$deceased, chisq = TRUE)
@@ -705,8 +707,108 @@ boxplot1 + ordered(dignity_nonfamily$chochinov3,
                               "Other"))
 
 
+# Create a table with the mean days to death for each categorical variables subgroups
+
+group_by(dignity_nonfamily,agegroup) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ racegroup, data = dignity_nonfamily)
+
+group_by(dignity_nonfamily,racegroup) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ racegroup, data = dignity_nonfamily)
+
+group_by(dignity_nonfamily,ethnicity) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ ethnicity, data = dignity_nonfamily)
+
+group_by(dignity_nonfamily,ethnicity) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ ethnicity, data = dignity_nonfamily)
+
+group_by(dignity_nonfamily,religiongroup) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ religiongroup, data = dignity_nonfamily)
+
+group_by(dignity_nonfamily,tumorsitegroup) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ tumorsitegroup, data = dignity_nonfamily)
 
 
+group_by(dignity_nonfamily,chochinov3) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE),
+    median = median(timetodeath_n, na.rm = TRUE),
+    twentyfifth = quantile(timetodeath_n, probs = 0.25, na.rm = TRUE),
+    seventyfifth = quantile(timetodeath_n, probs = 0.75, na.rm = TRUE)
+  )
+
+kruskal.test(timetodeath_n ~ chochinov3, data = dignity_nonfamily)
+
+
+lr1 = lm(timetodeath_n ~ agegroup + racegroup + tumorsitegroup + chochinov3, data = dignity_nonfamily)
+summary(lr)
+
+lr2 = lm(timetodeath_n ~ agegroup + racegroup + tumorsitegroup + code1nofam, data = dignity_nonfamily)
+summary(lr2)
+
+
+
+group_by(dignity_nonfamily, racegroup) %>%
+  summarise(
+    count = n(),
+    mean = mean(timetodeath_n, na.rm = TRUE),
+    sd = sd(timetodeath_n, na.rm = TRUE)
+  )
 
 
 
@@ -817,11 +919,9 @@ ggplot(data = dignity_family) + geom_bar(mapping = aes(x = tumorsitegroup, fill 
 ggplot(data = dignity_family) + geom_bar(mapping = aes(x = timetodeathgroup, fill = subcode1), position = "fill")
 
 
-
 # Look at the association between each independent variable and timetodeath_n as a function of code1
 ggplot(data = dignity) + geom_point(mapping = aes(x = agegroup, y=timetodeath_n, color = code1))
 ggplot(data = dignity) + geom_point(mapping = aes(x = racegroup, y=timetodeath_n, color = code1))
-
 
 ggplot(data = dignity) + geom_bar(mapping = aes(x = agegroup, fill = code1))
 
