@@ -1,36 +1,26 @@
-#########################
-## libraries to read in ##
-##########################
-
+## library
 library(expss)
 library(readxl)
 library(dplyr)
 library(tidyverse)
 library(summarytools)
 library(ggpubr)
+library(nnet)
 
-#######################
-## import of dataset ##
-#######################
-
+## import of dataset
 dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for analysis.xls")
 
-########################
-## wrangle of dataset ##
-########################
+## pdq response is dignity$DignityResponse
 
-# var: pdq dignity response
-  # dignity$DignityResponse
+## dignity code
+dignity$Code1
+typeof(dignity$Code1)
+dignity$code1 = factor(dignity$Code1)
+dignity %>% count(code1)
+ggplot(dignity) + geom_bar(mapping = aes(x = code1))
 
-# var: dignity code
-  dignity$Code1
-  typeof(dignity$Code1) # dignity$Code1 is a character variable
-  dignity$code1 = factor(dignity$Code1)  # tranform Code1 to a factor variable
-  dignity %>% count(code1) # 8 x 2 matrix of code1 and n
-  # ggplot(dignity) + geom_bar(mapping = aes(x = code1))  # bar graph and summary for code1, horrible formating
-
-# var: create the chochinov categorical variable based on code1
-  dignity <- dignity %>% 
+## create dignity category
+dignity <- dignity %>% 
     mutate( 
       chochinov3 = case_when(code1 == "Fears" ~ 'Illness-Related Concerns',
                              code1 == "Symptoms" ~ 'Illness-Related Concerns',
@@ -39,14 +29,16 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                              code1 == "Identity" ~ 'Dignity Conserving Repertoire',
                              code1 == "Interpersonal interaction" ~ 'Social Dignity Inventory',
                              code1 == "Other" ~ 'Other'))
-  dignity$chochinov3 <- factor(dignity$chochinov3,
+dignity$chochinov3 <- factor(dignity$chochinov3,
                           levels=c('Illness-Related Concerns', 
                              'Dignity Conserving Repertoire', 
                              'Social Dignity Inventory', 
                              'Other'))
-  dignity %>% count(chochinov3)
+dignity %>% count(chochinov3)
+dignity$chochinov3 = factor(dignity$chochinov3)
 
-  dignity <- dignity %>% 
+## create main dignity theme variable where family respondents to pdq are are recoded as NA
+dignity <- dignity %>% 
     mutate( 
       code1nofam = case_when(code1 == "Fears" ~ 'Fears',
                              code1 == "Symptoms" ~ 'Symptoms',
@@ -55,7 +47,7 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                              code1 == "Identity" ~ 'Identity',
                              code1 == "Interpersonal interaction" ~ 'Interpersonal Interaction',
                              code1 == "Other" ~ 'Other'))
-   dignity$code1nofam <- factor(dignity$code1nofam,
+dignity$code1nofam <- factor(dignity$code1nofam,
                                levels=c('Fears', 
                                         'Symptoms', 
                                         'Coping Strategies', 
@@ -63,18 +55,17 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                                         'Identity',
                                         'Interpersonal Interaction',
                                         'Other'))
+dignity %>% count(code1nofam)
   
-  dignity %>% count(code1nofam)
-  
-# var: Subcode1
-  dignity$subcode1 = factor(dignity$Subcode1) # tranform Subcode1 to a factor variable
-  # ggplot(dignity) + geom_bar(mapping = aes(x = subcode1)) + coord_flip() # bar graph and summary for subcode2
-  # dignity %>% count(subcode1)
-  dignity <- dignity %>% 
+## create dignity subtheme category
+dignity$subcode1 = factor(dignity$Subcode1) # tranform Subcode1 to a factor variable
+ggplot(dignity) + geom_bar(mapping = aes(x = subcode1)) + coord_flip() # bar graph and summary for subcode2
+dignity %>% count(subcode1)
+dignity <- dignity %>% 
     mutate( 
       code1fam = case_when(subcode1 == "Goals" ~ 'Goals',
                            subcode1 == "Identity" ~ 'Identity'))
-  dignity <- dignity %>% 
+dignity <- dignity %>% 
     mutate( 
       participant = case_when(Code1 == "Fears" ~ 'Patient',
                              Code1 == "Symptoms" ~ 'Patient',
@@ -84,27 +75,21 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                              Code1 == "Interpersonal interaction" ~ 'Patient',
                              Code1 == "Other" ~ 'Patient',
                              Code1 == "Family" ~ 'Family'))
-  dignity$chochinov3 <- factor(dignity$chochinov3,
+dignity$chochinov3 <- factor(dignity$chochinov3,
                                levels=c('Illness-Related Concerns', 
                                         'Dignity Conserving Repertoire', 
                                         'Social Dignity Inventory', 
                                         'Other'))
-  dignity %>% count(chochinov3)
+dignity %>% count(chochinov3)
   
-  # var4: Code2
-  # dignity$Code2
+## var4: Code2 dignity$Code2
+## var5: Subcode2 dignity$Subcode2
+## var6: AdmittingDiagnosis no changes at this time
 
-# var5: Subcode2
-  # dignity$Subcode2
-
-# var6: AdmittingDiagnosis
-  # no changes at this time
-
-# var7: Age
-  dignity$age_n = as.numeric(dignity$Age)  # Transform Age into a numeric variable
-  # ggplot(dignity) + geom_histogram(mapping = aes(x = age_n), binwidth = 1) # histogram and summary of age as a continuous metric
-  # for reference: dignity %>% count(cut_width(age_n, 10))
-  dignity_nonfamily <- dignity_nonfamily %>% 
+## agegroup
+dignity$age_n = as.numeric(dignity$Age)  # Transform Age into a numeric variable
+ggplot(dignity) + geom_histogram(mapping = aes(x = age_n), binwidth = 1) # histogram and summary of age as a continuous metric
+dignity_nonfamily <- dignity_nonfamily %>% 
     mutate( 
        agegroup = case_when(age_n >= 85  ~ '85 +',
                             age_n >= 75  & age_n <= 84 ~ '75 - 84',
@@ -113,68 +98,48 @@ dignity <- read_excel("/Volumes/NO NAME/Dignity/mskcc with merged codes for anal
                             age_n >= 45  & age_n <= 54 ~ '45 - 54',
                             age_n >= 35  & age_n <= 44 ~ '35 - 44',
                             age_n >= 20  & age_n <= 34 ~ '20 - 34')) 
+dignity %>% count(agegroup)
+dignity$agegroup= factor(dignity$agegroup)
 
-# var8: race
-  
-  dignity$race = factor(dignity$Race)  # tranform Race to a factor variable
-  # ggplot(dignity) + geom_bar(mapping = aes(x = Race)) # bar graph and summary for race
-  # dignity %>% count(race)
-  
-  dignity <- dignity %>% 
+
+## race
+dignity$race = factor(dignity$Race)  # tranform Race to a factor variable
+ggplot(dignity) + geom_bar(mapping = aes(x = Race)) # bar graph and summary for race
+dignity %>% count(race)
+
+## reclassification of race into groups
+dignity <- dignity %>% 
   mutate(
     racegroup = case_when(race == "WHITE" ~ 'White',
                           race == "BLACK"  ~ 'Black',
                           race == "ASIAN"  ~ 'Asian',
                           race == "NATIVE AMERICAN" | Race == "OTHER" ~ 'Other',
                           race == "PT REFUSED TO ANSWER" | Race == "NO VALUE ENTERED" | Race == "Unknown" ~ 'Refused/Unknown'))  # create racegroup 
-  
-  # dignity %>% count(racegroup)
-  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # bar graph and summary for racegroup, alphabetical order by category
-  
-  # dignity <- within(dignity, 
-  #                racegroup <- factor(racegroup, 
-  #                                   levels=names(sort(table(racegroup), 
-  #                                                    decreasing=TRUE))) # descending frequency
-  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # descending frequency
-  
-   dignity <- within(dignity, 
-                  racegroup <- factor(racegroup, 
-                                      levels=c('White', 'Black', 'Asian', 'Other', 'Refused/Unknown'))) # preferred data organization
-  # ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # preferred data organization
+dignity$racegroup <- factor(dignity$racegroup, 
+                            levels=c('White', 'Black', 'Asian', 'Other', 'Refused/Unknown'))
+ggplot(dignity) + geom_bar(mapping = aes(x = racegroup)) # preferred data organization
+dignity %>% count(racegroup)
 
-# var9: ethnicity
-
-  ggplot(dignity) + geom_bar(mapping = aes(x = Ethnicity)) # bar graph and summary for ethnicity  
-  dignity$ethnicity = factor(dignity$Ethnicity)  # tranform Ethnicity to a factor variable
-  dignity %>% count(ethnicity)
-  dignity <- dignity %>% 
-    mutate( 
-      ethnicity = case_when(ethnicity == "HISPANIC OR LATINO" ~ 'Hispanic or Latino',
-                          ethnicity == "NOT HISPANIC OR LATINO"  ~ 'Not Hispanic or Latino',
-                          ethnicity == "NO VALUE ENTERED"  ~ 'Unknown')) # recode ethnicity
-  dignity %>% count(ethnicity)
-  ggplot(dignity) + geom_bar(mapping = aes(x = ethnicity))
-
-  # this code to work through the way to order bars in the ggplot fuction
-# this it the generic code
-# theTable$Position <- factor(theTable$Position, levels = c(...))
-# this is the code with order 'Hispanic or Latino' 'Not Hispanic or Latino' 'Unknown'
-dignity <- within(dignity, 
-                  ethnicity <- factor(ethnicity, 
-                                      levels=c('Hispanic or Latino', 'Not Hispanic or Latino', 'Unknown')))
+## ethnicity
+dignity %>% count(Ethnicity)
+dignity$ethnicity = factor(dignity$Ethnicity)
+dignity <- dignity %>% 
+  mutate( 
+    ethnicity = case_when(ethnicity == "HISPANIC OR LATINO" ~ 'Hispanic or Latino',
+                          ethnicity == "NOT HISPANIC OR LATINO"  ~ 'Not Hispanic or Latino'))
+dignity %>% count(ethnicity)
 ggplot(dignity) + geom_bar(mapping = aes(x = ethnicity))
 dignity <- within(dignity, 
                   ethnicity <- factor(ethnicity, 
-                                      levels=c('Not Hispanic or Latino', 'Hispanic or Latino', 'Unknown')))
+                                      levels=c('Not Hispanic or Latino', 'Hispanic or Latino')))
 ggplot(dignity) + geom_bar(mapping = aes(x = ethnicity))
+dignity %>% count(ethnicity)
 
 
-
-# var10: religion
+## recode the religion group variable
 # bar graph and summary for religion
 ggplot(dignity) + geom_bar(mapping = aes(x = Religion)) + coord_flip()
 dignity %>% count(Religion)
-# recode religion into broader categories 
 dignity <- dignity %>% 
   mutate( 
     religiongroup = case_when(Religion == "Baptist" | 
@@ -203,12 +168,9 @@ dignity <- dignity %>%
                               Religion == "NO VALUE ENTERED" |
                               Religion == "Unknown" |
                               Religion == "" ~ 'Unknown/Refused'))
-# this code renames all of the NA (blank) responses in the dignity$religiongroup variable to "Unknown/Refused"
 dignity$religiongroup[is.na.data.frame(dignity$religiongroup)] <- "Unknown/Refused"
-# graph and quantify the distribution of religions in the dataset
 ggplot(dignity) + geom_bar(mapping = aes(x = religiongroup))
 dignity %>% count(religiongroup)
-
 dignity$religiongroup <- factor(dignity$religiongroup,
                              levels=c('Christian', 
                                       'Jewish', 
@@ -218,18 +180,16 @@ dignity$religiongroup <- factor(dignity$religiongroup,
                                       'None',
                                       'Other',
                                       'Unknown/Refused'))
+dignity %>% count(religiongroup)
+dignity$religiongroup= factor(dignity$religiongroup)
 
-# var11: TumorHistology
-# bar graph and summary for TumorHistology
-# ggplot(dignity) + geom_bar(mapping = aes(x = TumorHistology)) + coord_flip()
-# dignity %>% count(TumorHistology)
-# no changes at this time
 
-# var12: TumorSite
-# bar graph and summary for TumorHistology
+
+## tumor histology not included in this analysis
+
+## recode of tumor site
 ggplot(dignity) + geom_bar(mapping = aes(x = TumorSite)) + coord_flip()
 dignity %>% count(TumorSite)
-# recode tumorsite into broader categories 
 dignity <- dignity %>% 
   mutate( 
     tumorsitegroup = case_when(   TumorSite == "C019-TONGUE, BASE" |
@@ -412,8 +372,6 @@ dignity <- dignity %>%
 dignity$tumorsitegroup[is.na.data.frame(dignity$tumorsitegroup)] <- "Unknown Primary"
 # graph and quantify the distribution of tumor sites in the dataset
 ggplot(dignity) + geom_bar(mapping = aes(x = tumorsitegroup)) + coord_flip()
-dignity %>% count(tumorsitegroup)
-
 dignity$tumorsitegroup <- factor(dignity$tumorsitegroup,
                                 levels=c('Breast and Soft Tissue',
                                           'Digestive/Gastrointestinal',
@@ -424,34 +382,32 @@ dignity$tumorsitegroup <- factor(dignity$tumorsitegroup,
                                           'Respiratory/Thoracic',
                                           'Other',
                                           'Unknown Primary'))
+dignity %>% count(tumorsitegroup)
 
-# var13: Deceased
-# bar graph and summary for Deceased
+## characterize the sample into alive versus dead
 ggplot(dignity) + geom_bar(mapping = aes(x = Deceased)) + coord_flip()
 dignity %>% count(Deceased)
 dignity$deceased = factor(dignity$Deceased)  # tranform Code1 to a factor variable
 dignity %>% count(deceased)
 
-# no changes at this time
-
-
-
-# var14: TimetoDeathDays
-# Transform TimetoDeathDays into a numeric variable
+## for those who are dead, time between pdq administration and date of death
 dignity$timetodeath_n = as.numeric(dignity$TimetoDeathDays)
-# histogram and summary of n_timetodeath as a continuous metric
 ggplot(dignity) + geom_histogram(mapping = aes(x = timetodeath_n), binwidth = 10)
 dignity %>% count(cut_width(timetodeath_n, 50))
-# create categorical variable of age in groups of 10
 dignity <- dignity %>% 
   mutate( 
-    timetodeathgroup = case_when(timetodeath_n >= 730  & timetodeath_n <= 999 ~  'More than 2 years',
-                                 timetodeath_n >= 365  & timetodeath_n <= 730 ~  'More than 1 year',
-                                 timetodeath_n >= 180  & timetodeath_n <= 365 ~  '180 - 365 Days',
+    timetodeathgroup = case_when(timetodeath_n >= 365 ~  'More than 1 year',
+                                 timetodeath_n >= 181  & timetodeath_n <= 365 ~  '181 - 365 Days',
                                  timetodeath_n >= 31  & timetodeath_n <= 180 ~   '30 - 180 Days',
-                                 timetodeath_n >= 8  & timetodeath_n <= 30 ~     '7 - 30 Days',
-                                 timetodeath_n >= 0  & timetodeath_n <= 7 ~      '<= 7 days')) 
+                                 timetodeath_n >= 0  & timetodeath_n <= 30 ~     '0 - 30 Days')
+        )
+dignity$timetodeathgroup <- factor(dignity$timetodeathgroup,
+                                 levels=c('0 - 30 Days',
+                                          '30 - 180 Days',
+                                          '181 - 365 Days',
+                                          'More than 1 year'))
 dignity %>% count(timetodeathgroup)
+dignity$timetodeathgroup = factor(dignity$timetodeathgroup)
 
 ########################################
 ## Stratify the dataset by respondent ##
@@ -461,8 +417,41 @@ dignity_nonfamily <- subset(dignity, dignity$code1 != "Family") # subset of dign
 dignity_family <-  subset(dignity, dignity$code1 == "Family" & dignity$code1fam != 'NA') # subset of dignity for family-respondents
 
 #########################
-## Explore the dataset ##
+## Explore the dataset ##x
 #########################
+
+## Multinomial regression model, chochinov category as main dependent variable
+library(nnet)
+dignity_nonfamily$chochinov3
+dignity_nonfamily$agegroup
+dignity_nonfamily$religiongroup
+dignity_nonfamily$timetodeathgroup
+
+regression <- "chochinov3 ~ timetodeathgroup + agegroup"
+mlogit <- nnet::multinom(regression, data = dignity_nonfamily)
+output <- summary(mlogit)
+print(output)
+exp(coef(mlogit))
+exp(confint(mlogit))
+
+z <- output$coefficients/output$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1))*2 # we are using two-tailed z test
+  
+Pclass2 <- rbind(output$coefficients[1,],output$standard.errors[1,],z[1,],p[1,])
+rownames(Pclass2) <- c("Coefficient","Std. Errors","z stat","p value")
+knitr::kable(Pclass2)
+
+Pclass3 <- rbind(output$coefficients[2,],output$standard.errors[2,],z[2,],p[2,])
+rownames(Pclass3) <- c("Coefficient","Std. Errors","z stat","p value")
+knitr::kable(Pclass3)
+
+Pclass4 <- rbind(output$coefficients[3,],output$standard.errors[3,],z[3,],p[3,])
+rownames(Pclass4) <- c("Coefficient","Std. Errors","z stat","p value")
+knitr::kable(Pclass4)
+  
+mlr1 <- multinom(formula = chochinov3 ~ timetodeath_n, data = dignity_nonfamily)
+summary(mlr1)
+exp(coef(mlr1))
 
 # Patient as respondent tables
 mean(dignity_nonfamily$age_n)
@@ -801,6 +790,12 @@ summary(lr)
 lr2 = lm(timetodeath_n ~ agegroup + racegroup + tumorsitegroup + code1nofam, data = dignity_nonfamily)
 summary(lr2)
 
+lr2 = lm(timetodeath_n ~ agegroup + racegroup + tumorsitegroup + code1nofam, data = dignity_nonfamily)
+summary(lr2)
+
+mlr1 <- multinom(formula = chochinov3 ~ timetodeath_n, data = dignity_nonfamily)
+summary(mlr1)
+exp(coef(mlr1))
 
 
 group_by(dignity_nonfamily, racegroup) %>%
